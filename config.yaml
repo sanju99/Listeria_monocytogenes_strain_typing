@@ -1,0 +1,20 @@
+output_dir: "results"
+samples_file: "check_samples.csv"
+min_read_length: 50
+poly_G_length: 20
+spades_mode: 'isolate'
+ref_genome: "./references/GCF_000008285.1_ASM828v1_genomic.fna"
+kraken_db: "../TB-Illumina-WGS/references/krakenDB"
+mlst_profiles: 'references/mlst_profiles.tsv' # https://bigsdb.pasteur.fr/api/db/pubmlst_listeria_seqdef/schemes/2/profiles_csv
+
+# https://bigsdb.pasteur.fr/api/db/pubmlst_listeria_seqdef/schemes/3/profiles_csv is not really helpful because it just contains all the curated cgmlst1748 profiles, but it doesn't have sublineages or anything
+# it just has a profile_id column that is just an iterator. And the cgmlst1748_v2 scheme (https://bigsdb.pasteur.fr/api/db/pubmlst_listeria_seqdef/schemes/15/profiles_csv), which SHOULD have sublineages, just returns a table with a single header column of the gene names.
+# you can see all available schemes here: https://bigsdb.pasteur.fr/api/db/pubmlst_listeria_seqdef/schemes
+
+cgMLST1748_dir: "references/cgMLST1748"
+cgMLST1748_blast_DB: "references/cgMLST1748_blast_DB/listeria"
+genus: 'Listeria'
+species: 'monocytogenes'
+taxid: 1639
+bakta_db: "references/bakta_db"
+bakta_db_type: "light"

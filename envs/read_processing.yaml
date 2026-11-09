@@ -1,0 +1,7 @@
+name: read_processing
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - sra-tools
+  - fastp

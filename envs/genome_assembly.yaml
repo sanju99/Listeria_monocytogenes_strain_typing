@@ -1,0 +1,10 @@
+name: genome_assembly
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - spades
+  - seqkit
+  - kraken2
+  - bwa
+  - samtools

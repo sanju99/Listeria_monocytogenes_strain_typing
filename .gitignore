@@ -1,0 +1,24 @@
+# Environments
+.conda/
+
+# large directories
+/roary_results/
+/results/
+/references/bakta_db
+/references/*/
+.snakemake/
+/phylogeny/
+
+# sensitive data
+/data/
+
+# Temporary files
+.DS_Store
+.ipynb_checkpoints/
+
+# testing files
+blinded_samples_results.csv
+check_samples.csv
+contam_samples.csv
+samples.csv
+samples_full.csv

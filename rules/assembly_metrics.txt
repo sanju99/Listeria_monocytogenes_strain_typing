@@ -1,0 +1,216 @@
+process QUAST {
+
+    tag "${sample} (${mode}) (${kmer_set})"
+
+    publishDir {"${params.outdir}/${sample}/${preprocessing}/spades/${mode}/${kmer_set}"}, mode: 'copy'
+
+    input:
+    tuple val(sample), 
+          val(mode), 
+          val(preprocessing), 
+          val(kmer_set), 
+          path(contigs), 
+          path(scaffolds),
+          path(filtered_contigs)
+
+    output:
+    tuple val(sample), 
+          val(mode), 
+          val(preprocessing), 
+          val(kmer_set), 
+          path("quast/report.tsv")
+
+    script:
+    """
+    quast.py ${contigs} ${scaffolds} ${filtered_contigs} -l contigs,scaffold,filtered_contigs -o quast --threads ${task.cpus}
+    """
+}
+
+
+process MAP_READS_TO_ASM {
+
+    tag "${sample} (${mode}) (${preprocessing}) (${kmer_set})"
+
+    input:
+    tuple val(sample),
+          val(mode),
+          val(preprocessing),
+          val(kmer_set),
+          path(contigs),
+          path(r1),
+          path(r2),
+          path(merged)
+
+    output:
+    tuple val(sample),
+          val(mode),
+          val(preprocessing),
+          val(kmer_set),
+          path("paired_reads.sam"),
+          path("merged_reads.sam")
+
+    script:
+    """
+    bwa index ${contigs}
+
+    bwa mem -t ${task.cpus} ${contigs} ${r1} ${r2} > paired_reads.sam
+
+    bwa mem -t ${task.cpus} ${contigs} ${merged} > merged_reads.sam
+    """
+}
+
+
+process SAMTOOLS_CONVERT_TO_BAM_COMPUTE_COVERAGE {
+
+    tag "${sample} (${mode}) (${preprocessing}) (${kmer_set})"
+
+    publishDir "${params.outdir}/${sample}/${preprocessing}/spades/${mode}/${kmer_set}/read_mapping_filtered_contigs", mode: 'copy'
+
+    input:
+    tuple val(sample),
+          val(mode),
+          val(preprocessing),
+          val(kmer_set),
+          path(sam_file_paired),
+          path(sam_file_merged)
+
+    output:
+    tuple val(sample),
+          val(mode),
+          val(preprocessing),
+          val(kmer_set),
+          path("paired_reads.bam"),
+          path("paired_reads.bam.bai"),
+          path("merged_reads.bam"),
+          path("merged_reads.bam.bai"),
+          path("bwa_mapped_sorted.bam"),
+          path("bwa_mapped_sorted.bam.bai"),
+          path("${sample}.depth.MQ20.BQ30.tsv.gz"),
+          path("${sample}.depth.noFilters.tsv.gz"),
+          path("${sample}.flagstat.tsv"),
+          path("${sample}.idxstats.tsv")
+
+    script:
+    """
+    # convert both SAM files to BAMs, then merge them. Save both individual BAMs in case need to reference them later
+    samtools view -b -@ ${task.cpus} ${sam_file_paired} | samtools sort -@ ${task.cpus} -o paired_reads.bam
+    samtools index -@ ${task.cpus} paired_reads.bam
+
+    samtools view -b -@ ${task.cpus} ${sam_file_merged} | samtools sort -@ ${task.cpus} -o merged_reads.bam
+    samtools index -@ ${task.cpus} merged_reads.bam
+
+    # merge BAMs and index
+    samtools merge paired_reads.bam merged_reads.bam -@ ${task.cpus} -o bwa_mapped_sorted.bam
+    samtools index -@ ${task.cpus} bwa_mapped_sorted.bam
+
+    # compute coverage with and without some filters
+    samtools depth --min-MQ 20 --min-BQ 30 -aa bwa_mapped_sorted.bam | gzip -c > "${sample}.depth.MQ20.BQ30.tsv.gz"
+    samtools depth -aa bwa_mapped_sorted.bam | gzip -c > "${sample}.depth.noFilters.tsv.gz"
+
+    # this is to get global assembly statistics. 
+    # -O tsv makes it easier to read into pandas for analysis
+    samtools flagstat -@ ${task.cpus} -O tsv bwa_mapped_sorted.bam > "${sample}.flagstat.tsv"
+
+    # this is to get per-contig information. Requires BAM file to be indexed
+    samtools idxstats bwa_mapped_sorted.bam > "${sample}.idxstats.tsv"    
+    """
+}
+
+
+process KRAKEN2 {
+
+    tag "${sample} (${mode}) (${kmer_set})"
+
+    publishDir {"${params.outdir}/${sample}/${preprocessing}/spades/${mode}/${kmer_set}/kraken2"}, mode: 'copy'
+
+    input:
+    path kraken_db
+    tuple val(sample), 
+          val(mode), 
+          val(preprocessing), 
+          val(kmer_set), 
+          path(contigs)
+
+    output:
+    tuple val(sample),
+          val(mode),
+          val(preprocessing),
+          val(kmer_set),
+          path("${sample}.kraken_report.txt"),
+          path("${sample}.kraken_classifications.txt")
+
+    script:
+    """
+    kraken2 --db ${kraken_db} \
+            --use-names --memory-mapping \
+            --report ${sample}.kraken_report.txt \
+            --output ${sample}.kraken_classifications.txt \
+            ${contigs} \
+            --threads ${task.cpus}
+    """
+}
+
+
+process CHECKM2 {
+
+    tag "${sample} (${mode}) (${preprocessing}) (${kmer_set})"
+
+    publishDir {"${params.outdir}/${sample}/${preprocessing}/spades/${mode}/${kmer_set}"}, mode: 'copy'
+
+    input:
+    path checkm2_db
+
+    tuple val(sample),
+          val(mode),
+          val(preprocessing),
+          val(kmer_set),
+          path(contigs),
+          path(filtered_contigs)
+
+    output:
+    tuple val(sample),
+          val(mode),
+          val(preprocessing),
+          val(kmer_set),
+          path("checkm2/quality_report.tsv")
+
+    script:
+    """
+    checkm2 predict \
+        --threads ${task.cpus} \
+        --input ${contigs} ${filtered_contigs} \
+        --output-directory checkm2 \
+        --database_path ${checkm2_db}
+    """
+}
+
+
+process SKANI {
+
+    tag "${sample} (${mode}) (${kmer_set})"
+
+    publishDir {"${params.outdir}/${sample}/${preprocessing}/spades/${mode}/${kmer_set}/skani"}, mode: 'copy'
+
+    input:
+    tuple val(sample), 
+          val(mode), 
+          val(preprocessing), 
+          val(kmer_set), 
+          path(filtered_contigs)
+
+    output:
+    tuple val(sample),
+          val(mode),
+          val(preprocessing),
+          val(kmer_set),
+          path("${sample}.classifications.txt")
+
+    script:
+    """
+    skani search --qi ${filtered_contigs} \
+            -d ${params.skani_DB} \
+            -o ${sample}.classifications.txt \
+            -t ${task.cpus} \
+            --no-marker-index
+    """
+}

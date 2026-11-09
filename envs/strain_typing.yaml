@@ -1,0 +1,7 @@
+name: strain_typing
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - mlst
+  - blast

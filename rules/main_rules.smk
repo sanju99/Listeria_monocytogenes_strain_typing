@@ -94,11 +94,6 @@ rule compute_draft_assembly_stats:
 
 
 
-# finally, create CRAM file to cut down on disk space
-# samtools view -T {input.contigs_file} -C -o {output.combined_cram} {output.combined_bam}
-# samtools index -@ {threads} {output.combined_cram}
-
-
 rule map_reads_to_ASM_compute_metrics:
     input:
         contigs_file = f"{sample_out_dir}/spades/contigs.fasta",
@@ -108,8 +103,12 @@ rule map_reads_to_ASM_compute_metrics:
     output:
         paired_reads_bam = temp(f"{sample_out_dir}/alignment/paired_reads.bam"),
         merged_reads_bam = temp(f"{sample_out_dir}/alignment/merged_reads.bam"),
-        combined_bam = temp(f"{sample_out_dir}/alignment/bwa_mapped_sorted.bam"),
-        combined_bam_index = temp(f"{sample_out_dir}/alignment/bwa_mapped_sorted.bam.bai"),
+        
+        combined_bam = temp(f"{sample_out_dir}/alignment/{{sample_ID}}.bam"),
+        combined_bam_index = temp(f"{sample_out_dir}/alignment/{{sample_ID}}.bam.bai"),
+        
+        combined_cram = f"{sample_out_dir}/alignment/{{sample_ID}}.cram",
+        combined_cram_index = f"{sample_out_dir}/alignment/{{sample_ID}}.cram.crai",
 
         depth_file = f"{sample_out_dir}/alignment/{{sample_ID}}.depth.tsv.gz",
         flagstat_file = f"{sample_out_dir}/alignment/{{sample_ID}}.flagstat.tsv",
@@ -120,13 +119,16 @@ rule map_reads_to_ASM_compute_metrics:
         8
     shell:
         """
+        # index reference genome (which is the spades assembly)
         bwa index {input.contigs_file}
 
+        # align the paired reads to the reference
         bwa mem -t {threads} {input.contigs_file} {input.fastq1_trimmed} {input.fastq2_trimmed} | samtools view -b -@ {threads} | samtools sort -@ {threads} -o {output.paired_reads_bam}
 
+        # align the merged reads to the reference
         bwa mem -t {threads} {input.contigs_file} {input.merged_reads} | samtools view -b -@ {threads} | samtools sort -@ {threads} -o {output.merged_reads_bam}
 
-        # merge BAMs and index
+        # merge the two BAMs and index
         samtools merge {output.paired_reads_bam} {output.merged_reads_bam} -@ {threads} -o {output.combined_bam}
         samtools index -@ {threads} {output.combined_bam}
 
@@ -139,6 +141,10 @@ rule map_reads_to_ASM_compute_metrics:
     
         # this is to get per-contig information.
         samtools idxstats {output.combined_bam} > {output.idxstats_file}
+
+        # finally, create CRAM file to cut down on disk space
+        samtools view -T {input.contigs_file} -C -o {output.combined_cram} {output.combined_bam}
+        samtools index -@ {threads} {output.combined_cram}
         """
 
 

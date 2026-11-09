@@ -10,17 +10,13 @@ output_dir = config["output_dir"]
 df_samples_runs = pd.read_csv(config['samples_file'])
 sample_SRA_dict = dict(zip(df_samples_runs['SampleName'], df_samples_runs['Run']))
 
-include: "rules/rules.smk"
+include: "rules/main_rules.smk"
 
 # Define rules in the Snakefile
 
 rule all:
     input:
-        # [f"{output_dir}/{sample_ID}/{sample_ID}_{N}.fastq.gz" for sample_ID in sample_SRA_dict.keys() for N in [1, 2]],
-        # [f"{output_dir}/{sample_ID}/genome_annotation/bakta/{sample_ID}.gff3" for sample_ID in sample_SRA_dict.keys()],
-        # [f"{output_dir}/{sample_ID}/kraken/classifications.tsv" for sample_ID in sample_SRA_dict.keys()],
-        # [f"{output_dir}/{sample_ID}/strain_typing/cgMLST1748_blast_results.tsv.gz" for sample_ID in sample_SRA_dict.keys()],
         [f"{output_dir}/{sample_ID}/strain_typing/lineage_CC.csv" for sample_ID in sample_SRA_dict.keys()],
-        # [f"{output_dir}/{sample_ID}/assembly/quast/report.tsv" for sample_ID in sample_SRA_dict.keys()],
+        [f"{output_dir}/{sample_ID}/assembly/quast/report.tsv" for sample_ID in sample_SRA_dict.keys()],
         # [f"{output_dir}/{sample_ID}/genome_annotation/bakta/{sample_ID}.gff3" for sample_ID in sample_SRA_dict.keys()],
-        # [f"phylogeny/core_genome.aln"]
+        # [f"{output_dir}/{sample_ID}/strain_typing/cgMLST1748_blast_results.tsv.gz" for sample_ID in sample_SRA_dict.keys()],

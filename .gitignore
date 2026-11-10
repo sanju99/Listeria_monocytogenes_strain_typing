@@ -25,3 +25,4 @@ samples_full.csv
 
 # unused
 references/GCF_000008285.1_ASM828v1_genomic*
+*.ipynb

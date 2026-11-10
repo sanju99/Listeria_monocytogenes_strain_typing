@@ -1,10 +1,10 @@
-# <i>Listeria monocytogenes</i> strain typing workflow
+# <i>Listeria monocytogenes</i> strain typing
 
 This pipeline has been tested on an Apple Silicon Mac using a base snakemake environment with `snakemake v7.32.4` and `python v3.11.15`.
 
 The conda/mamba environment creation is what will change if you have a different machine (Mac Apple Silion, Mac Intel, Linux, etc.). This pipeline will not work on Windows without substantial changes.
 
-Download the `mamba` package manager, then create the base environment with the following command:
+Install `miniforge` by following the instructions for your machine <a href="https://conda-forge.org/download/" target="_blank">here</a>. Then create the base environment with the following command:
 
 ```bash
 mamba env create -f envs/snakemake.yaml
@@ -13,9 +13,21 @@ mamba env create -f envs/snakemake.yaml
 Then activate this environment, then run the pipeline:
 
 ```bash
+# activate the snakemake environment
 mamba activate snakemake
+
+# navigate into this directory
+cd Listeria_strain_typing
+
+# run the pipeline
 bash run_smk.sh
 ```
+
+## Download Kraken Database
+
+The kraken database is too large to store on GitHub, so you have to download it yourself from <a href="https://benlangmead.github.io/aws-indexes/k2" target="_blank">here</a>. This workflow was tested with the Standard-16 database. 
+
+Download it to the `references/` folder and open it with `tar -xfz k2_standard_16_GB_2026.tar.gz` OR if you're on a Mac, just double click the file in Finder to unzip it using the Archive Utility. Then change the `kraken_db` parameter in `config.yaml` to match the path to your kraken database (if you downloaded the 2026 file above, then the path should match).
 
 ## Workflow
 

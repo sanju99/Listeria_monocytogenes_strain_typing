@@ -5,8 +5,7 @@ import pandas as pd
 # define some paths to make the path names more readable
 sample_out_dir = f"{output_dir}/{{sample_ID}}"
 
-primary_directory = "/Users/szk017/Documents/Projects/Listeria"
-
+# function to get the SRA ID for a given sample from the dictionary
 def get_sra_id(wildcards):
     return sample_SRA_dict[wildcards.sample_ID]
 
@@ -28,7 +27,7 @@ rule download_FASTQ_trim_adapters:
         poly_G_length = config["poly_G_length"],
         adapters_file = "references/NexteraPE-PE.fa",
     conda:
-        f"{primary_directory}/envs/read_processing.yaml"
+        "envs/read_processing.yaml"
     threads:
         8
     shell:
@@ -63,7 +62,7 @@ rule spades_assembly:
         spades_mode = config['spades_mode'],
         output_dir = f"{sample_out_dir}/spades",
     conda:
-        f"{primary_directory}/envs/genome_assembly.yaml"
+        "envs/genome_assembly.yaml"
     threads:
         8
     shell:
@@ -100,7 +99,7 @@ rule map_reads_to_ASM_compute_metrics:
         flagstat_file = f"{sample_out_dir}/alignment/{{sample_ID}}.flagstat.tsv",
         idxstats_file = f"{sample_out_dir}/alignment/{{sample_ID}}.idxstats.tsv",
     conda:
-        f"{primary_directory}/envs/genome_assembly.yaml"
+        "envs/genome_assembly.yaml"
     threads:
         8
     shell:
@@ -145,7 +144,7 @@ rule kraken2:
         output_dir = f"{sample_out_dir}/spades",
         kraken_db = config['kraken_db'],
     conda:
-        f"{primary_directory}/envs/genome_assembly.yaml"
+        "envs/genome_assembly.yaml"
     threads:
         8
     shell:
@@ -168,8 +167,8 @@ rule filter_assembly_contigs:
         filtered_contigs_file = f"{sample_out_dir}/assembly/contigs.fasta",
     params:
         taxid = config['taxid'],
-        min_contig_length = 500,
-        min_contig_median_cov = 10,
+        min_contig_length = config['min_contig_length'],
+        min_contig_median_cov = config['min_contig_median_cov'],
         kraken_db = config['kraken_db'],
     shell:
         """
@@ -194,7 +193,7 @@ rule compute_assembly_stats:
     params:
         quast_dir = f"{sample_out_dir}/assembly/quast",
     conda:
-        f"{primary_directory}/envs/genome_annotation.yaml"
+        "envs/genome_annotation.yaml"
     threads:
         1
     shell:
@@ -212,7 +211,7 @@ rule run_mlst:
     threads:
         1
     conda:
-        f"{primary_directory}/envs/strain_typing.yaml"
+        "envs/strain_typing.yaml"
     shell:
         """
         # --full includes the header. -q is quiet mode

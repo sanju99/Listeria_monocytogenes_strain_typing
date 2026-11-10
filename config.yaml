@@ -4,7 +4,12 @@ min_read_length: 50
 poly_G_length: 20
 spades_mode: 'isolate'
 ref_genome: "./references/GCF_000008285.1_ASM828v1_genomic.fna"
-kraken_db: "../TB-Illumina-WGS/references/krakenDB"
+kraken_db: "./references/k2_standard_16_GB_20261022"
+
+min_contig_length: 500
+min_contig_median_cov: 10
+taxid: 1639
+
 mlst_profiles: 'references/mlst_profiles.tsv' # downloaded from https://bigsdb.pasteur.fr/api/db/pubmlst_listeria_seqdef/schemes/2/profiles_csv
 
 # https://bigsdb.pasteur.fr/api/db/pubmlst_listeria_seqdef/schemes/3/profiles_csv is not really helpful because it just contains all the curated cgmlst1748 profiles, but it doesn't have sublineages or anything
@@ -13,8 +18,6 @@ mlst_profiles: 'references/mlst_profiles.tsv' # downloaded from https://bigsdb.p
 
 cgMLST1748_dir: "references/cgMLST1748"
 cgMLST1748_blast_DB: "references/cgMLST1748_blast_DB/listeria"
-genus: 'Listeria'
-species: 'monocytogenes'
-taxid: 1639
+
 bakta_db: "references/bakta_db"
 bakta_db_type: "light"

@@ -1,13 +1,14 @@
 # Environments
 .conda/
 
-# large directories
+# large directories and files
 /roary_results/
 /results/
 /references/bakta_db
 /references/*/
 .snakemake/
 /phylogeny/
+*.tar.gz
 
 # sensitive data
 /data/

@@ -29,4 +29,3 @@ rules/additional_rules.smk
 references/GCF_000008285.1_ASM828v1_genomic*
 *.ipynb
 scripts/data_curation.py
-scripts/make_kraken_DB_helper_files.py

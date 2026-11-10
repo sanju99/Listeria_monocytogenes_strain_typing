@@ -21,7 +21,9 @@ mamba env create -f envs/snakemake.yaml
 
 The kraken database is too large to store on GitHub, so you have to download it yourself from <a href="https://benlangmead.github.io/aws-indexes/k2" target="_blank">here</a>. This workflow was tested with the Standard-16 database. 
 
-Download it to the `references/` folder and open it with `tar -xfz k2_standard_16_GB_2026.tar.gz` OR if you're on a Mac, just double click the file in Finder to unzip it using the Archive Utility. Then change the `kraken_db` parameter in `config.yaml` to match the path to your kraken database (if you downloaded the 2026 file above, then the path should match).
+Download it to the `references/` folder and open it with `tar -xfz k2_standard_16_GB_2026.tar.gz` OR if you're on a Mac, just double click the file in Finder to unzip it using the Archive Utility. 
+
+Then change the `kraken_db` parameter in `config.yaml` to match the path to your kraken database (if you downloaded the 2026 file above, then the path should match).
 
 ## Workflow
 

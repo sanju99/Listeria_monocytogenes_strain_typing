@@ -2,6 +2,7 @@
 
 # snakemake --use-conda --conda-create-envs-only --conda-frontend mamba --configfile config.yaml --cores 18
 
+# unlock the directory in case there are any locks
 snakemake --snakefile snakefile \
           --configfile config.yaml \
           --use-conda --conda-frontend mamba \
@@ -9,7 +10,7 @@ snakemake --snakefile snakefile \
           --rerun-incomplete --keep-going \
           --unlock
 
-
+# run the pipeline
 snakemake --snakefile snakefile \
           --configfile config.yaml \
           --use-conda --conda-frontend mamba \

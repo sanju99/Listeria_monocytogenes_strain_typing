@@ -16,6 +16,7 @@
 # Temporary files
 .DS_Store
 .ipynb_checkpoints/
+__pycache__/
 
 # testing files
 blinded_samples_results.csv

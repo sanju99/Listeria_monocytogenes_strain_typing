@@ -22,6 +22,7 @@ blinded_samples_results.csv
 check_samples.csv
 contam_samples.csv
 samples_full.csv
+rules/additional_rules.smk
 
 # unused
 references/GCF_000008285.1_ASM828v1_genomic*

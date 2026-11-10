@@ -1,24 +1,3 @@
-rule download_FASTQ:
-    output:
-        fastq1 = f"{sample_out_dir}/{{sample_ID}}_1.fastq.gz",
-        fastq2 = f"{sample_out_dir}/{{sample_ID}}_2.fastq.gz",
-    params:
-        sample_out_dir = sample_out_dir,
-        SRA_ID = get_sra_id,
-    conda:
-        f"{primary_directory}/envs/read_processing.yaml"
-    threads:
-        8
-    shell:
-        """
-        fastq-dump --gzip --split-files --outdir {params.sample_out_dir} {params.SRA_ID}
-
-        mv {params.sample_out_dir}/{params.SRA_ID}_1.fastq.gz {output.fastq1}
-        mv {params.sample_out_dir}/{params.SRA_ID}_2.fastq.gz {output.fastq2}
-        """
-
-
-
 rule compute_downloaded_assembly_stats:
     input:
         filtered_contigs_file = f"{sample_out_dir}/assembly/contigs.fasta",
@@ -27,7 +6,7 @@ rule compute_downloaded_assembly_stats:
     params:
         quast_dir = f"{sample_out_dir}/assembly/quast",
     conda:
-        f"{primary_directory}/envs/genome_annotation.yaml"
+        "../envs/genome_annotation.yaml"
     threads:
         1
     shell:
@@ -46,7 +25,7 @@ rule make_blast_cgMLST1748_DB:
     threads:
         1
     conda:
-        f"{primary_directory}/envs/strain_typing.yaml"
+        "../envs/strain_typing.yaml"
     shell:
         """
         # cat all the FASTAs into 
@@ -68,7 +47,7 @@ rule blast_cgMLST1748_DB:
     threads:
         8
     conda:
-        f"{primary_directory}/envs/strain_typing.yaml"
+        "../envs/strain_typing.yaml"
     shell:
         """
         blastn -query {input.contigs_file} \
@@ -126,7 +105,7 @@ rule download_bakta_db:
     output:
         bakta_db = directory(f"{config['bakta_db']}/db-{config['bakta_db_type']}"),
     conda:
-        f"{primary_directory}/envs/genome_annotation.yaml"
+        "../envs/genome_annotation.yaml"
     shell:
         """
         bakta_db download --output {params.bakta_db} --type {params.bakta_db_type}
@@ -147,7 +126,7 @@ rule run_bakta:
     threads:
         8
     conda:
-        f"{primary_directory}/envs/genome_annotation.yaml"
+        "../envs/genome_annotation.yaml"
     shell:
         """
         bakta --db {params.bakta_db} \

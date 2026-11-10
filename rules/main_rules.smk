@@ -27,7 +27,7 @@ rule download_FASTQ_trim_adapters:
         poly_G_length = config["poly_G_length"],
         adapters_file = "references/NexteraPE-PE.fa",
     conda:
-        "envs/read_processing.yaml"
+        "../envs/read_processing.yaml"
     threads:
         8
     shell:
@@ -62,7 +62,7 @@ rule spades_assembly:
         spades_mode = config['spades_mode'],
         output_dir = f"{sample_out_dir}/spades",
     conda:
-        "envs/genome_assembly.yaml"
+        "../envs/genome_assembly.yaml"
     threads:
         8
     shell:
@@ -99,7 +99,7 @@ rule map_reads_to_ASM_compute_metrics:
         flagstat_file = f"{sample_out_dir}/alignment/{{sample_ID}}.flagstat.tsv",
         idxstats_file = f"{sample_out_dir}/alignment/{{sample_ID}}.idxstats.tsv",
     conda:
-        "envs/genome_assembly.yaml"
+        "../envs/genome_assembly.yaml"
     threads:
         8
     shell:
@@ -144,7 +144,7 @@ rule kraken2:
         output_dir = f"{sample_out_dir}/spades",
         kraken_db = config['kraken_db'],
     conda:
-        "envs/genome_assembly.yaml"
+        "../envs/genome_assembly.yaml"
     threads:
         8
     shell:
@@ -193,7 +193,7 @@ rule compute_assembly_stats:
     params:
         quast_dir = f"{sample_out_dir}/assembly/quast",
     conda:
-        "envs/genome_annotation.yaml"
+        "../envs/genome_annotation.yaml"
     threads:
         1
     shell:
@@ -211,7 +211,7 @@ rule run_mlst:
     threads:
         1
     conda:
-        "envs/strain_typing.yaml"
+        "../envs/strain_typing.yaml"
     shell:
         """
         # --full includes the header. -q is quiet mode

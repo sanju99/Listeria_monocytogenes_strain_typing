@@ -1,26 +1,20 @@
 # <i>Listeria monocytogenes</i> strain typing
 
-This pipeline has been tested on an Apple Silicon Mac using a base snakemake environment with `snakemake v7.32.4` and `python v3.11.15`.
+This pipeline takes <i>Listeria monocytogenes</i> paired-end Illumina FASTQ files, assembles them into draft assemblies, and performs strain typing.
+
+## Environment Set-Up
+
+This pipeline has been tested on an Apple Silicon computer using a base snakemake environment with `snakemake v7.32.4` and `python v3.11.15`.
 
 The conda/mamba environment creation is what will change if you have a different machine (Mac Apple Silion, Mac Intel, Linux, etc.). This pipeline will not work on Windows without substantial changes.
 
 Install `miniforge` by following the instructions for your machine <a href="https://conda-forge.org/download/" target="_blank">here</a>. Then create the base environment with the following command:
 
 ```bash
-mamba env create -f envs/snakemake.yaml
-```
-
-Then activate this environment, then run the pipeline:
-
-```bash
-# activate the snakemake environment
-mamba activate snakemake
-
 # navigate into this directory
-cd Listeria_strain_typing
+cd Listeria_monocytogenes_strain_typing
 
-# run the pipeline
-bash run_smk.sh
+mamba env create -f envs/snakemake.yaml
 ```
 
 ## Download Kraken Database
@@ -42,6 +36,25 @@ The full workflow for a single sample is shown in `dag.png`. The steps are:
 7. Run multi-locus sequence typing (MLST) using `mlst`.
 8. Compare the MLST results with the list of 7-gene MLST profiles downloaded from L'Institut Pasteur to assign lineages, sequence types (ST), and clonal complexes (CC). The allele profiles were downloaded from <a href="https://bigsdb.pasteur.fr/api/db/pubmlst_listeria_seqdef/schemes/2/profiles_csv" target="_blank">here</a> in November 2026.
 
+To run the workflow, activate the snakemake environment, then run the bash script:
+
+```bash
+# activate the snakemake environment
+mamba activate snakemake
+
+# navigate into this directory
+cd Listeria_monocytogenes_strain_typing
+
+# run the pipeline
+bash run_smk.sh
+```
+
 ## Inputs
 
 The workflow requires an input CSV file with two columns: `SampleName` is the sample name (it can be whatever you want) and `Run` is the SRA ID to fetch the FASTQ files using `fasterq-dump`. `Run` must be a valid SRA ID, otherwise it will fail to download the FASTQ files.
+
+## Outputs
+
+The results will be written to a new directory `results/` within this repository. Each sample will have its own subdirectory.
+
+If you want to change which steps are run in the pipeline, change the output files defined in `rule all:` in `snakefile`. But this is only needed for debugging and testing.

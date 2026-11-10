@@ -78,20 +78,6 @@ rule spades_assembly:
         """
 
 
-rule compute_draft_assembly_stats:
-    input:
-        contigs_file = f"{sample_out_dir}/spades/contigs.fasta",
-    output:
-        stats_file = f"{sample_out_dir}/spades/seqkit_stats.tsv",
-    conda:
-        f"{primary_directory}/envs/genome_assembly.yaml"
-    threads:
-        1
-    shell:
-        """
-        seqkit stats --all {input.contigs_file} --basename --tabular > {output.stats_file}
-        """
-
 
 
 rule map_reads_to_ASM_compute_metrics:
